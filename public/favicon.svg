@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" fill="#020b18" rx="4"/>
+  <polygon points="16,2 29,9 29,23 16,30 3,23 3,9"
+    fill="none" stroke="#0bc4e3" stroke-width="1.5"/>
+  <text x="16" y="22" text-anchor="middle" fill="#0bc4e3"
+    font-family="Arial Black, sans-serif" font-weight="900" font-size="16">R</text>
+</svg>

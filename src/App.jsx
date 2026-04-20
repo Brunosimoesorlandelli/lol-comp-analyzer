@@ -1078,6 +1078,7 @@ export default function App() {
   const [page, setPage]       = useState("analyzer"); // "analyzer" | "proscene" | "saved"
   const [view, setView]       = useState("build"); // "build" | "analysis"
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
   const { saves, saveComp, deleteComp, renameComp } = useSavedComps();
 
   useEffect(() => {
@@ -1085,6 +1086,20 @@ export default function App() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+
+  // PWA install prompt
+  useEffect(() => {
+    const handler = e => { e.preventDefault(); setInstallPrompt(e); };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = useCallback(async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") setInstallPrompt(null);
+  }, [installPrompt]);
 
   // Load DDragon
   useEffect(() => {
@@ -1392,6 +1407,69 @@ export default function App() {
         <BottomPicker roleKey={picker} comp={comp} champions={champions}
           version={ddVersion} onSelect={handleSelect} onClose={()=>setPicker(null)} />
       )}
+
+      {/* ── PWA INSTALL BANNER ── */}
+      {installPrompt && (
+        <div style={{
+          position:"fixed", bottom:0, left:0, right:0, zIndex:500,
+          background:"rgba(6,21,37,0.97)", backdropFilter:"blur(16px)",
+          borderTop:"1px solid rgba(11,196,227,0.25)",
+          padding:"12px 20px",
+          display:"flex", alignItems:"center", justifyContent:"space-between", gap:12,
+          animation:"fadeUp .3s ease",
+        }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+            <svg width="32" height="32" viewBox="0 0 32 32">
+              <rect width="32" height="32" fill="#020b18" rx="4"/>
+              <polygon points="16,2 29,9 29,23 16,30 3,23 3,9"
+                fill="none" stroke="#0bc4e3" strokeWidth="1.5"/>
+              <text x="16" y="22" textAnchor="middle" fill="#0bc4e3"
+                fontFamily="Arial Black" fontWeight="900" fontSize="16">R</text>
+            </svg>
+            <div>
+              <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
+                fontSize:12, color:"#fff", letterSpacing:".05em" }}>Instalar RiftForge</div>
+              <div style={{ fontSize:10, color:"var(--muted)" }}>Acesso rápido, funciona offline</div>
+            </div>
+          </div>
+          <div style={{ display:"flex", gap:8 }}>
+            <button onClick={()=>setInstallPrompt(null)}
+              style={{ background:"none", border:"1px solid var(--border)", borderRadius:2,
+                padding:"6px 12px", color:"var(--muted)", fontSize:10,
+                fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:".1em", cursor:"pointer" }}>
+              AGORA NÃO
+            </button>
+            <button onClick={handleInstall}
+              style={{ background:"var(--cyan)", border:"none", borderRadius:2,
+                padding:"6px 14px", color:"var(--bg0)", fontSize:10, fontWeight:700,
+                fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:".1em", cursor:"pointer" }}>
+              INSTALAR
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── LEGAL FOOTER ── */}
+      <footer style={{
+        borderTop:"1px solid rgba(255,255,255,0.04)",
+        padding:"10px 20px",
+        background:"rgba(2,11,24,0.8)",
+        display:"flex", alignItems:"center", justifyContent:"center",
+        flexWrap:"wrap", gap:"6px 16px",
+        position:"relative", zIndex:1,
+      }}>
+        <span style={{ fontSize:9, color:"rgba(255,255,255,0.18)",
+          fontFamily:"'Barlow',sans-serif", textAlign:"center", lineHeight:1.5 }}>
+          RiftForge não é endossado pela Riot Games e não reflete as visões ou opiniões da Riot Games
+          ou de qualquer pessoa oficialmente envolvida na produção ou gestão de League of Legends.
+          League of Legends e Riot Games são marcas registradas da Riot Games, Inc.
+          Dados fornecidos pelo{" "}
+          <a href="https://developer.riotgames.com/docs/lol" target="_blank" rel="noopener noreferrer"
+            style={{ color:"rgba(11,196,227,0.4)", textDecoration:"none" }}>
+            Riot Games Data Dragon
+          </a>.
+        </span>
+      </footer>
     </>
   );
 }

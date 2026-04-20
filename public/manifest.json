@@ -1,0 +1,14 @@
+{
+  "name": "RiftForge — LoL Comp Analyzer",
+  "short_name": "RiftForge",
+  "description": "Monte e analise composições de League of Legends com dados oficiais da Riot Games.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020b18",
+  "theme_color": "#0bc4e3",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -2,11 +2,54 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>LoL Comp Analyzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- ── SEO ── -->
+    <title>RiftForge — LoL Comp Analyzer</title>
+    <meta name="description" content="Monte e analise composições de League of Legends. Sinergias, win rate estimado, estratégias e fraquezas — baseado nos dados oficiais da Riot Games (Data Dragon)."/>
+    <meta name="keywords" content="league of legends, comp analyzer, composição, draft, tier list, sinergias, LoL"/>
+    <meta name="author" content="RiftForge"/>
+    <meta name="robots" content="index, follow"/>
+    <link rel="canonical" href="https://lol-comp-analyzer.vercel.app/"/>
+
+    <!-- ── Open Graph ── -->
+    <meta property="og:type"        content="website"/>
+    <meta property="og:url"         content="https://lol-comp-analyzer.vercel.app/"/>
+    <meta property="og:title"       content="RiftForge — LoL Comp Analyzer"/>
+    <meta property="og:description" content="Monte e analise composições de League of Legends com dados oficiais da Riot Games."/>
+    <meta property="og:image"       content="https://lol-comp-analyzer.vercel.app/icon-512.png"/>
+
+    <!-- ── Twitter Card ── -->
+    <meta name="twitter:card"        content="summary"/>
+    <meta name="twitter:title"       content="RiftForge — LoL Comp Analyzer"/>
+    <meta name="twitter:description" content="Monte e analise composições de League of Legends com dados oficiais da Riot Games."/>
+    <meta name="twitter:image"       content="https://lol-comp-analyzer.vercel.app/icon-512.png"/>
+
+    <!-- ── PWA ── -->
+    <link rel="manifest"             href="/manifest.json"/>
+    <meta name="theme-color"         content="#0bc4e3"/>
+    <meta name="apple-mobile-web-app-capable"          content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="apple-mobile-web-app-title"            content="RiftForge"/>
+    <link rel="apple-touch-icon"     href="/icon-192.png"/>
+
+    <!-- ── Favicon ── -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="icon" type="image/png"     href="/icon-192.png"/>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+
+    <!-- ── Service Worker ── -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js")
+            .then(reg => console.log("[RiftForge] SW registrado:", reg.scope))
+            .catch(err => console.warn("[RiftForge] SW falhou:", err));
+        });
+      }
+    </script>
   </body>
 </html>

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#020b18"/>
+  <!-- Outer hex -->
+  <polygon points="256,24 464,136 464,376 256,488 48,376 48,136"
+    fill="none" stroke="#0bc4e3" stroke-width="12"/>
+  <!-- Inner hex -->
+  <polygon points="256,80 408,164 408,348 256,432 104,348 104,164"
+    fill="rgba(11,196,227,0.12)" stroke="#0bc4e3" stroke-width="6"/>
+  <!-- R letter -->
+  <text x="256" y="320" text-anchor="middle" fill="#0bc4e3"
+    font-family="Arial Black, sans-serif" font-weight="900"
+    font-size="220" letter-spacing="-10">R</text>
+  <!-- Gold accent line -->
+  <line x1="160" y1="420" x2="352" y2="420" stroke="#f0b429" stroke-width="6"
+    stroke-linecap="round"/>
+</svg>
