@@ -332,11 +332,11 @@ const GLOBAL_CSS = `
 `;
 
 
+
 // ─── SVG icons por role ──────────────────────────────────────────────────────
 const ROLE_ICONS = {
   top: (color, size=28) => (
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      {/* Espada */}
       <line x1="6" y1="22" x2="20" y2="8" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
       <line x1="18" y1="6" x2="22" y2="10" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
       <line x1="10" y1="11" x2="13" y2="14" stroke={color} strokeWidth="3" strokeLinecap="round"/>
@@ -345,7 +345,6 @@ const ROLE_ICONS = {
   ),
   jungle: (color, size=28) => (
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      {/* Garra / pata */}
       <path d="M10 20 Q8 14 10 8" stroke={color} strokeWidth="2" strokeLinecap="round"/>
       <path d="M14 21 Q13 14 14 7" stroke={color} strokeWidth="2.2" strokeLinecap="round"/>
       <path d="M18 20 Q20 14 18 8" stroke={color} strokeWidth="2" strokeLinecap="round"/>
@@ -354,16 +353,12 @@ const ROLE_ICONS = {
   ),
   mid: (color, size=28) => (
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      {/* Diamante / cristal */}
-      <polygon points="14,4 22,14 14,24 6,14"
-        stroke={color} strokeWidth="2" fill={color + "22"}/>
-      <polygon points="14,9 18,14 14,19 10,14"
-        fill={color} opacity="0.5"/>
+      <polygon points="14,4 22,14 14,24 6,14" stroke={color} strokeWidth="2" fill={color + "22"}/>
+      <polygon points="14,9 18,14 14,19 10,14" fill={color} opacity="0.5"/>
     </svg>
   ),
   adc: (color, size=28) => (
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      {/* Mira / crosshair */}
       <circle cx="14" cy="14" r="8" stroke={color} strokeWidth="1.8"/>
       <circle cx="14" cy="14" r="2.5" fill={color} opacity="0.7"/>
       <line x1="14" y1="4" x2="14" y2="8" stroke={color} strokeWidth="2" strokeLinecap="round"/>
@@ -374,16 +369,15 @@ const ROLE_ICONS = {
   ),
   support: (color, size=28) => (
     <svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      {/* Escudo */}
       <path d="M14 4 L22 7 L22 15 Q22 21 14 25 Q6 21 6 15 L6 7 Z"
         stroke={color} strokeWidth="2" fill={color + "18"}/>
-      <path d="M10 14 L13 17 L18 11"
-        stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M10 14 L13 17 L18 11" stroke={color} strokeWidth="2.2"
+        strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
 };
 
-// ─── DraftSlot — cartão individual de cada role ────────────────────────────────
+// ─── DraftSlot ────────────────────────────────────────────────────────────────
 function DraftSlot({ roleKey, champ, version, onTap, onRemove }) {
   const r = ROLES.find(r => r.key === roleKey);
   const [hover, setHover] = useState(false);
@@ -394,248 +388,217 @@ function DraftSlot({ roleKey, champ, version, onTap, onRemove }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
       style={{
-        flex: 1,
-        minWidth: 0,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 0,
+        flex: 1, minWidth: 0, position: "relative",
         cursor: "pointer",
         WebkitTapHighlightColor: "transparent",
         userSelect: "none",
+        borderRadius: 3,
+        overflow: "hidden",
+        // Border reacts to state
+        outline: `1.5px solid ${champ ? r.color + "bb" : hover ? r.color + "44" : "rgba(255,255,255,0.07)"}`,
+        boxShadow: champ
+          ? `0 0 28px ${r.color}28, inset 0 0 40px ${r.color}06`
+          : hover ? `0 0 14px ${r.color}18` : "none",
+        transition: "outline .2s, box-shadow .2s",
+        // Force full height of container
+        alignSelf: "stretch",
       }}
     >
-      {/* ── Card principal ── */}
-      <div style={{
-        width: "100%",
-        aspectRatio: "3/4",
-        position: "relative",
-        borderRadius: 4,
-        overflow: "hidden",
-        border: `1.5px solid ${champ ? r.color : hover ? r.color + "55" : "rgba(255,255,255,0.08)"}`,
-        background: champ
-          ? "transparent"
-          : `linear-gradient(160deg, ${r.color}0a 0%, rgba(6,21,37,0.9) 100%)`,
-        boxShadow: champ
-          ? `0 0 20px ${r.color}33, inset 0 0 30px ${r.color}08`
-          : hover
-            ? `0 0 12px ${r.color}22`
-            : "none",
-        transition: "all 0.2s ease",
-      }}>
-
-        {/* Imagem do campeão — cobre o card inteiro */}
-        {champ && (
-          <>
-            <img
-              src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champ.id}_0.jpg`}
-              alt={champ.name}
-              onError={e => {
-                e.target.src = `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${champ.id}.png`;
-              }}
-              style={{
-                position: "absolute", inset: 0,
-                width: "100%", height: "100%",
-                objectFit: "cover", objectPosition: "top center",
-              }}
-            />
-            {/* Gradiente sobre a imagem */}
-            <div style={{
+      {/* ── Imagem splash — fill total ── */}
+      {champ ? (
+        <>
+          <img
+            src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champ.id}_0.jpg`}
+            alt={champ.name}
+            onError={e => {
+              e.target.src = `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${champ.id}.png`;
+              e.target.style.objectPosition = "center";
+            }}
+            style={{
               position: "absolute", inset: 0,
-              background: `linear-gradient(
-                to bottom,
-                transparent 30%,
-                rgba(6,14,26,0.5) 65%,
-                rgba(6,14,26,0.92) 100%
-              )`,
-            }}/>
-            {/* Borda colorida bottom */}
-            <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0, height: 2,
-              background: `linear-gradient(90deg, transparent, ${r.color}, transparent)`,
-            }}/>
-          </>
-        )}
-
-        {/* Estado vazio — símbolo da role centralizado */}
-        {!champ && (
+              width: "100%", height: "100%",
+              objectFit: "cover",
+              objectPosition: "top center",
+              transition: "transform .4s ease",
+              transform: hover ? "scale(1.04)" : "scale(1)",
+            }}
+          />
+          {/* Gradient: só na parte inferior, preserva rosto */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: `linear-gradient(to bottom,
+              transparent 0%,
+              transparent 45%,
+              rgba(6,10,20,0.55) 70%,
+              rgba(6,10,20,0.95) 100%)`,
+          }}/>
+          {/* Barra colorida no topo */}
+          <div style={{
+            position: "absolute", top: 0, left: 0, right: 0, height: 3,
+            background: `linear-gradient(90deg, transparent, ${r.color}, transparent)`,
+          }}/>
+        </>
+      ) : (
+        /* ── Estado vazio ── */
+        <>
+          {/* Fundo com noise sutil */}
+          <div style={{
+            position: "absolute", inset: 0,
+            background: `
+              radial-gradient(ellipse at 50% 40%, ${r.color}0d 0%, transparent 70%),
+              #060e1a
+            `,
+          }}/>
+          {/* Grid pontilhada */}
+          <div style={{
+            position: "absolute", inset: 0,
+            backgroundImage: `radial-gradient(circle, ${r.color}28 1px, transparent 1px)`,
+            backgroundSize: "24px 24px",
+            opacity: hover ? 0.8 : 0.4,
+            transition: "opacity .2s",
+          }}/>
+          {/* Ícone central grande */}
           <div style={{
             position: "absolute", inset: 0,
             display: "flex", flexDirection: "column",
-            alignItems: "center", justifyContent: "center",
-            gap: 10,
+            alignItems: "center", justifyContent: "center", gap: 12,
           }}>
-            {/* Ícone SVG da lane */}
-            <div style={{ opacity: hover ? 0.7 : 0.35, transition: "opacity .2s" }}>
-              {ROLE_ICONS[roleKey](r.color, 36)}
-            </div>
-            {/* Crosshair decorativo */}
             <div style={{
-              position: "absolute", inset: 0,
-              backgroundImage: `
-                linear-gradient(${r.color}18 1px, transparent 1px),
-                linear-gradient(90deg, ${r.color}18 1px, transparent 1px)
-              `,
-              backgroundSize: "20px 20px",
-              opacity: hover ? 0.6 : 0.25,
+              opacity: hover ? 0.85 : 0.3,
+              transform: hover ? "scale(1.08)" : "scale(1)",
+              transition: "all .2s",
+            }}>
+              {ROLE_ICONS[roleKey](r.color, 48)}
+            </div>
+            <span style={{
+              fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700,
+              fontSize: 10, letterSpacing: ".2em",
+              color: hover ? r.color : "rgba(255,255,255,0.2)",
+              transition: "color .2s",
+            }}>SELECIONAR</span>
+          </div>
+          {/* Cantos decorativos */}
+          {[[0,0,"top","left"],[0,0,"top","right"],[0,0,"bottom","left"],[0,0,"bottom","right"]].map(([,,v,h],i)=>(
+            <div key={i} style={{
+              position:"absolute", [v]:10, [h]:10,
+              width:14, height:14,
+              borderTop: v==="top" ? `1.5px solid ${r.color}` : "none",
+              borderBottom: v==="bottom" ? `1.5px solid ${r.color}` : "none",
+              borderLeft: h==="left" ? `1.5px solid ${r.color}` : "none",
+              borderRight: h==="right" ? `1.5px solid ${r.color}` : "none",
+              opacity: hover ? 0.7 : 0.25,
               transition: "opacity .2s",
             }}/>
-            {/* Bordas de canto */}
-            {[["0","0","right","bottom"],["auto","0","left","bottom"],
-              ["0","auto","right","top"],["auto","auto","left","top"]].map(([b,r2,brr,brt],i)=>(
-              <div key={i} style={{
-                position:"absolute",
-                bottom: b !== "auto" ? 8 : "auto",
-                right:  r2 !== "auto" ? 8 : "auto",
-                top:    brt === "top" ? 8 : "auto",
-                left:   brr === "right" ? "auto" : 8,
-                width: 12, height: 12,
-                borderColor: r.color,
-                borderStyle: "solid",
-                borderWidth: 0,
-                [brt === "top" ? "borderTopWidth" : "borderBottomWidth"]: "1.5px",
-                [brr === "right" ? "borderRightWidth" : "borderLeftWidth"]: "1.5px",
-                opacity: hover ? 0.7 : 0.3,
-                transition: "opacity .2s",
-              }}/>
-            ))}
-          </div>
-        )}
+          ))}
+        </>
+      )}
 
-        {/* Chip da role — canto superior esquerdo */}
-        <div style={{
-          position: "absolute", top: 8, left: 8,
-          display: "flex", alignItems: "center", gap: 4,
-          background: "rgba(2,11,24,0.75)", backdropFilter: "blur(4px)",
-          borderRadius: 2, padding: "3px 6px",
-          border: `1px solid ${r.color}44`,
-        }}>
-          <div style={{ opacity: 0.9 }}>
-            {ROLE_ICONS[roleKey](r.color, 12)}
-          </div>
-          <span style={{
-            fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700,
-            fontSize: 9, letterSpacing: ".12em", color: r.color,
-          }}>{r.label}</span>
-        </div>
-
-        {/* Botão remover — canto superior direito */}
-        {champ && (
-          <button
-            onClick={e => { e.stopPropagation(); onRemove(roleKey); }}
-            style={{
-              position: "absolute", top: 6, right: 6,
-              width: 22, height: 22, borderRadius: "50%",
-              background: "rgba(232,68,43,0.85)",
-              border: "1.5px solid rgba(255,255,255,0.2)",
-              color: "#fff", fontSize: 12, fontWeight: 700,
-              cursor: "pointer", display: "flex", alignItems: "center",
-              justifyContent: "center", lineHeight: 1,
-              WebkitTapHighlightColor: "transparent",
-              transition: "background .15s",
-              backdropFilter: "blur(4px)",
-            }}
-            onMouseEnter={e => e.currentTarget.style.background = "#e8442b"}
-            onMouseLeave={e => e.currentTarget.style.background = "rgba(232,68,43,0.85)"}
-          >×</button>
-        )}
-
-        {/* Nome do campeão — rodapé do card */}
-        {champ && (
-          <div style={{
-            position: "absolute", bottom: 8, left: 8, right: 8,
-          }}>
-            <div style={{
-              fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700,
-              fontSize: 13, color: "#fff", letterSpacing: ".04em",
-              lineHeight: 1.1, textShadow: "0 1px 4px rgba(0,0,0,0.8)",
-              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-            }}>{champ.name}</div>
-            <div style={{
-              fontSize: 9, color: r.color, letterSpacing: ".08em",
-              fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600,
-              marginTop: 1,
-            }}>{champ.tags?.join(" · ")}</div>
-          </div>
-        )}
+      {/* ── Chip role — sempre visível no topo ── */}
+      <div style={{
+        position: "absolute", top: 10, left: 10,
+        display: "flex", alignItems: "center", gap: 5,
+        background: "rgba(2,8,20,0.72)", backdropFilter: "blur(6px)",
+        borderRadius: 2, padding: "4px 8px",
+        border: `1px solid ${r.color}55`,
+        zIndex: 2,
+      }}>
+        {ROLE_ICONS[roleKey](r.color, 13)}
+        <span style={{
+          fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700,
+          fontSize: 9, letterSpacing: ".15em", color: r.color,
+        }}>{r.label}</span>
       </div>
 
-      {/* Indicador de "clique" quando vazio */}
-      {!champ && (
+      {/* ── Botão remover ── */}
+      {champ && (
+        <button
+          onClick={e => { e.stopPropagation(); onRemove(roleKey); }}
+          style={{
+            position: "absolute", top: 8, right: 8, zIndex: 3,
+            width: 24, height: 24, borderRadius: "50%",
+            background: "rgba(232,68,43,0.82)", backdropFilter: "blur(6px)",
+            border: "1.5px solid rgba(255,255,255,0.15)",
+            color: "#fff", fontSize: 13, fontWeight: 700,
+            cursor: "pointer", display: "flex", alignItems: "center",
+            justifyContent: "center", lineHeight: 1,
+            WebkitTapHighlightColor: "transparent",
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = "#e8442b"}
+          onMouseLeave={e => e.currentTarget.style.background = "rgba(232,68,43,0.82)"}
+        >×</button>
+      )}
+
+      {/* ── Info do campeão — rodapé ── */}
+      {champ && (
         <div style={{
-          marginTop: 6, fontSize: 9,
-          color: hover ? r.color : "rgba(255,255,255,0.2)",
-          fontFamily: "'Barlow Condensed',sans-serif",
-          letterSpacing: ".12em", fontWeight: 600,
-          transition: "color .2s",
-        }}>+ SELECIONAR</div>
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          padding: "10px 12px 12px", zIndex: 2,
+        }}>
+          <div style={{
+            fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 800,
+            fontSize: "clamp(11px, 1.8vw, 16px)", color: "#fff",
+            letterSpacing: ".03em", lineHeight: 1.1,
+            textShadow: "0 1px 6px rgba(0,0,0,0.9)",
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{champ.name}</div>
+          <div style={{
+            fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 600,
+            fontSize: "clamp(8px, 1.2vw, 11px)",
+            color: r.color, letterSpacing: ".08em", marginTop: 2,
+            textShadow: `0 0 8px ${r.color}88`,
+          }}>{champ.tags?.join(" · ")}</div>
+        </div>
       )}
     </div>
   );
 }
 
-// ─── DraftBoard — layout de 5 slots lado a lado ──────────────────────────────
+// ─── DraftBoard ───────────────────────────────────────────────────────────────
 function DraftBoard({ comp, version, onTap, onRemove, onAnalyze, allFilled, filled, ddVersion }) {
   return (
     <div style={{
       flex: 1, display: "flex", flexDirection: "column",
-      padding: "24px 20px 16px",
+      padding: "12px 14px 12px",
       background: "var(--bg0)",
       overflow: "hidden",
+      minHeight: 0,
     }}>
-      {/* Cabeçalho */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div>
-            <div style={{
-              fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700,
-              fontSize: 9, letterSpacing: ".22em", color: "var(--cyan)", marginBottom: 4,
-              display: "flex", alignItems: "center", gap: 6,
-            }}>
-              <span style={{ width:5, height:5, borderRadius:"50%", background:"var(--cyan)",
-                display:"inline-block", boxShadow:"0 0 5px var(--cyan)" }}/>
-              FASE 01 — DRAFT
-            </div>
-            <div style={{
-              fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 800,
-              fontSize: 22, color: "#fff", letterSpacing: ".03em", lineHeight: 1,
-            }}>
-              Monte sua<br/>
-              <span style={{ color: "var(--gold)" }}>composição</span>
-            </div>
-          </div>
-          {/* Progresso */}
-          <div style={{ textAlign: "right" }}>
-            <div style={{
-              fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 800,
-              fontSize: 32, color: filled === 5 ? "var(--gold)" : "var(--cyan)",
-              lineHeight: 1,
-              textShadow: filled === 5 ? "0 0 20px rgba(240,180,41,0.5)" : "none",
-              transition: "all .3s",
-            }}>{filled}<span style={{ fontSize: 16, opacity: 0.5, fontWeight: 400 }}>/5</span></div>
-            <div style={{
-              display: "flex", gap: 4, justifyContent: "flex-end", marginTop: 4,
-            }}>
-              {ROLES.map(r => (
-                <div key={r.key} style={{
-                  width: 8, height: 8,
-                  borderRadius: 1,
-                  background: comp[r.key] ? r.color : "rgba(255,255,255,0.08)",
-                  boxShadow: comp[r.key] ? `0 0 5px ${r.color}` : "none",
-                  transition: "all .3s",
-                }}/>
-              ))}
-            </div>
-          </div>
+      {/* Header minimalista */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        marginBottom: 10, flexShrink: 0,
+      }}>
+        <div style={{
+          fontFamily: "'Barlow Condensed',sans-serif", fontWeight: 700,
+          fontSize: 9, letterSpacing: ".22em", color: "rgba(11,196,227,0.5)",
+          display: "flex", alignItems: "center", gap: 6,
+        }}>
+          <span style={{ width:5, height:5, borderRadius:"50%", background:"var(--cyan)",
+            display:"inline-block", boxShadow:"0 0 5px var(--cyan)" }}/>
+          FASE 01 — DRAFT · SELECIONE OS 5 CAMPEÕES
+        </div>
+        {/* Progress pips */}
+        <div style={{ display:"flex", gap:5, alignItems:"center" }}>
+          {ROLES.map(r => (
+            <div key={r.key} style={{
+              width: comp[r.key] ? 10 : 7, height: comp[r.key] ? 10 : 7,
+              borderRadius: 2,
+              background: comp[r.key] ? r.color : "rgba(255,255,255,0.08)",
+              boxShadow: comp[r.key] ? `0 0 6px ${r.color}` : "none",
+              transition: "all .25s",
+            }}/>
+          ))}
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800,
+            fontSize:13, color: filled===5 ? "var(--gold)" : "var(--muted)",
+            marginLeft:4, letterSpacing:".05em", transition:"color .3s",
+          }}>{filled}<span style={{ opacity:.4, fontWeight:400 }}>/5</span></span>
         </div>
       </div>
 
-      {/* ── 5 slots lado a lado ── */}
+      {/* ── 5 cards — ocupam todo o espaço disponível ── */}
       <div style={{
-        display: "flex",
-        gap: 10,
-        flex: 1,
-        minHeight: 0,
+        display: "flex", gap: 8,
+        flex: 1, minHeight: 0,
       }}>
         {ROLES.map(r => (
           <DraftSlot
@@ -650,20 +613,19 @@ function DraftBoard({ comp, version, onTap, onRemove, onAnalyze, allFilled, fill
       </div>
 
       {/* Botão analisar */}
-      <div style={{ marginTop: 14 }}>
+      <div style={{ marginTop: 10, flexShrink: 0 }}>
         <button
-          onClick={onAnalyze}
-          disabled={!allFilled}
+          onClick={onAnalyze} disabled={!allFilled}
           className={`btn-primary ${allFilled ? "ready" : ""}`}
           style={{ width: "100%", padding: "13px", fontSize: 12 }}
         >
-          {allFilled ? "◆ ANALISAR COMPOSIÇÃO" : `SELECIONE MAIS ${5 - filled} CAMPEÃO${5-filled!==1?"ÕES":""}`}
+          {allFilled
+            ? "◆ ANALISAR COMPOSIÇÃO"
+            : `SELECIONE MAIS ${5 - filled} CAMPEÃO${5-filled!==1?"ÕES":""}`}
         </button>
-        <div style={{
-          textAlign: "center", marginTop: 6, fontSize: 8,
-          color: "rgba(11,196,227,0.2)", letterSpacing: ".12em",
-          fontFamily: "'Barlow Condensed',sans-serif",
-        }}>
+        <div style={{ textAlign:"center", marginTop:5, fontSize:8,
+          color:"rgba(11,196,227,0.18)", letterSpacing:".1em",
+          fontFamily:"'Barlow Condensed',sans-serif" }}>
           ANÁLISE LOCAL · RIOT DATA DRAGON v{ddVersion}
         </div>
       </div>
@@ -671,325 +633,297 @@ function DraftBoard({ comp, version, onTap, onRemove, onAnalyze, allFilled, fill
   );
 }
 
-
-// ─── ChampImg ─────────────────────────────────────────────────────────────────
-function ChampImg({ version, id, name, size=48, radius=4, border, style={} }) {
-  const [err, setErr] = useState(false);
+// ─── StatBar grande (para tela de análise) ────────────────────────────────────
+function BigStatBar({ label, value, color, showValue=true }) {
   return (
-    <img
-      src={err ? `https://placehold.co/${typeof size==="number"?size:48}x${typeof size==="number"?size:48}/061525/0bc4e3?text=${name?.[0]||"?"}` : `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${id}.png`}
-      alt={name} onError={() => setErr(true)}
-      style={{ width:size, height:size, borderRadius:radius, objectFit:"cover",
-        flexShrink:0, border: border ?? "1px solid rgba(11,196,227,0.2)", ...style }}
-    />
-  );
-}
-
-// ─── StatBar ──────────────────────────────────────────────────────────────────
-function StatBar({ label, value, color }) {
-  return (
-    <div style={{ marginBottom:9 }}>
-      <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
-        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600,
-          fontSize:10, letterSpacing:".1em", color:"var(--muted)" }}>{label}</span>
-        <span style={{ fontSize:10, color, fontFamily:"monospace" }}>{value}%</span>
+    <div style={{ marginBottom: 0 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"baseline", marginBottom:5 }}>
+        <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
+          fontSize:11, letterSpacing:".12em", color:"var(--muted)" }}>{label}</span>
+        {showValue && (
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800,
+            fontSize:14, color, letterSpacing:".05em" }}>{value}</span>
+        )}
       </div>
-      <div style={{ height:3, background:"rgba(255,255,255,0.07)", borderRadius:2, overflow:"hidden" }}>
-        <div style={{ height:"100%", width:`${value}%`, borderRadius:2,
-          background:`linear-gradient(90deg,${color}55,${color})`,
-          transition:"width 1s cubic-bezier(0.34,1.56,0.64,1)" }}/>
+      <div style={{ height:6, background:"rgba(255,255,255,0.06)", borderRadius:1, overflow:"hidden" }}>
+        <div style={{
+          height:"100%", width:`${value}%`, borderRadius:1,
+          background:`linear-gradient(90deg, ${color}66, ${color})`,
+          boxShadow:`0 0 8px ${color}55`,
+          transition:"width 1.1s cubic-bezier(0.34,1.2,0.64,1)",
+        }}/>
       </div>
     </div>
   );
 }
 
-// ─── BottomPicker ─────────────────────────────────────────────────────────────
-function BottomPicker({ roleKey, comp, champions, version, onSelect, onClose }) {
-  const [search, setSearch] = useState("");
-  const [rf, setRf]         = useState("all");
-  const r = ROLES.find(r => r.key === roleKey);
-  const taken = Object.values(comp).filter(Boolean).map(c => c.id);
-  const list = useMemo(() =>
-    champions.filter(c =>
-      c.name.toLowerCase().includes(search.toLowerCase()) &&
-      (rf === "all" || c.roles.includes(rf)) &&
-      !taken.includes(c.id)
-    ), [champions, search, rf, taken]);
-
-  return (
-    <>
-      <div onClick={onClose} style={{ position:"fixed", inset:0, background:"rgba(2,11,24,0.82)",
-        zIndex:200, backdropFilter:"blur(6px)", animation:"bd .2s ease" }}/>
-      <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)",
-        width:"100%", maxWidth:520, zIndex:201, background:"var(--bg1)",
-        borderTop:`2px solid ${r.color}77`, borderRadius:"18px 18px 0 0",
-        height:"80vh", display:"flex", flexDirection:"column",
-        animation:"su .28s cubic-bezier(0.32,0.72,0,1)" }}>
-        <div style={{ display:"flex", justifyContent:"center", padding:"10px 0 0" }}>
-          <div style={{ width:36, height:4, borderRadius:2, background:"var(--border)" }}/>
-        </div>
-        <div style={{ padding:"8px 16px 10px", borderBottom:"1px solid var(--border)" }}>
-          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
-            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-              <div style={{ width:2, height:16, background:r.color }}/>
-              <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-                fontSize:13, letterSpacing:".15em", color:r.color }}>
-                SELECIONAR {r.label}
-              </span>
-            </div>
-            <button onClick={onClose} style={{ background:"none", border:"none",
-              color:"var(--muted)", fontSize:22, cursor:"pointer", lineHeight:1 }}>×</button>
-          </div>
-          <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Buscar campeão..." autoFocus
-            style={{ width:"100%", padding:"9px 12px", marginBottom:10,
-              background:"rgba(11,196,227,0.04)", border:"1px solid var(--border)",
-              borderRadius:2, color:"var(--text)", fontSize:13,
-              fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:".05em", outline:"none" }}/>
-          <div style={{ display:"flex", gap:6, overflowX:"auto", paddingBottom:2 }}>
-            {["all",...ROLES.map(r=>r.key)].map(k => {
-              const rd = ROLES.find(r=>r.key===k);
-              const active = rf===k;
-              return (
-                <button key={k} onClick={()=>setRf(k)} style={{
-                  flexShrink:0, padding:"4px 12px", borderRadius:1, cursor:"pointer",
-                  background: active?`${rd?.color||"var(--cyan)"}22`:"transparent",
-                  border:`1px solid ${active?(rd?.color||"var(--cyan)"):"var(--border)"}`,
-                  color: active?(rd?.color||"var(--cyan)"):"var(--muted)",
-                  fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-                  fontSize:10, letterSpacing:".12em", WebkitTapHighlightColor:"transparent",
-                }}>{k==="all"?"ALL":rd?.label}</button>
-              );
-            })}
-          </div>
-        </div>
-        <div style={{ flex:1, overflowY:"auto", padding:12 }}>
-          <div style={{ fontSize:9, color:"var(--muted)", letterSpacing:".18em", marginBottom:8 }}>
-            ◆ {list.length} CAMPEÕES DISPONÍVEIS
-          </div>
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
-            {list.map(champ => (
-              <button key={champ.id} onClick={()=>onSelect(roleKey,champ)} style={{
-                background:"rgba(11,196,227,0.03)", border:"1px solid rgba(11,196,227,0.1)",
-                borderRadius:2, padding:"8px 4px",
-                display:"flex", flexDirection:"column", alignItems:"center", gap:5,
-                cursor:"pointer", WebkitTapHighlightColor:"transparent", touchAction:"manipulation",
-                transition:"all .15s" }}
-                onMouseEnter={e=>e.currentTarget.style.borderColor="rgba(11,196,227,0.4)"}
-                onMouseLeave={e=>e.currentTarget.style.borderColor="rgba(11,196,227,0.1)"}>
-                <ChampImg version={version} id={champ.id} name={champ.name} size={54} radius={2}/>
-                <span style={{ fontSize:9, color:"var(--muted)", fontFamily:"'Barlow Condensed',sans-serif",
-                  fontWeight:600, textAlign:"center", lineHeight:1.3 }}>{champ.name}</span>
-              </button>
-            ))}
-            {list.length===0 && (
-              <div style={{ gridColumn:"1/-1", textAlign:"center", padding:32,
-                color:"var(--muted)", fontSize:12 }}>Nenhum campeão encontrado</div>
-            )}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ─── AnalysisPanel ────────────────────────────────────────────────────────────
+// ─── AnalysisPanel — novo layout em duas colunas ─────────────────────────────
 function AnalysisPanel({ analysis, comp, version, onBack, onReset, onSave }) {
   const [tab, setTab] = useState("stats");
-  const rc = { S:"#f0b429", A:"#0bc4e3", B:"#a78bfa", C:"#5a7a90" };
-  const color = rc[analysis.rating]||"#0bc4e3";
+  const RC = { S:"#f0b429", A:"#0bc4e3", B:"#a78bfa", C:"#5a7a90" };
+  const ratingColor = RC[analysis.rating] || "#0bc4e3";
+
+  const stats = [
+    { label:"TEAMFIGHT",  value:analysis.teamFight, color:"#e8442b" },
+    { label:"EARLY GAME", value:analysis.earlyGame,  color:"#f0b429" },
+    { label:"ENGAGE",     value:analysis.engage,     color:"#3cb043" },
+    { label:"POKE",       value:analysis.poke,       color:"#0bc4e3" },
+    { label:"SPLIT PUSH", value:analysis.split,      color:"#a78bfa" },
+  ];
 
   return (
-    <div className="analysis-panel" style={{ padding:"24px 20px", animation:"fadeUp .4s ease" }}>
-      <button onClick={onBack} style={{ background:"none", border:"none", color:"var(--cyan)",
-        fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600, fontSize:11,
-        letterSpacing:".15em", cursor:"pointer", marginBottom:20,
-        display:"flex", alignItems:"center", gap:6, padding:0 }}>
-        ← EDITAR COMPOSIÇÃO
-      </button>
+    <div style={{ height:"100%", display:"flex", flexDirection:"column",
+      background:"var(--bg0)", overflow:"hidden", animation:"fadeUp .35s ease" }}>
 
-      {/* Card rating */}
-      <div className="panel hex-corner" style={{ padding:16, marginBottom:14, position:"relative" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
-          <div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-              fontSize:9, letterSpacing:".2em", color:"var(--muted)", marginBottom:4 }}>
-              ◆ WIN RATE ESTIMADO
-            </div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800,
-              fontSize:42, color:"var(--gold)", lineHeight:1 }}>{analysis.winrate}%</div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600,
-              fontSize:10, letterSpacing:".15em", color:"var(--cyan)", marginTop:4 }}>
-              {analysis.playstyle.toUpperCase()}
-            </div>
-          </div>
-          <div style={{ textAlign:"right" }}>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800,
-              fontSize:56, lineHeight:1, color, textShadow:`0 0 30px ${color}88` }}>
-              {analysis.rating}
-            </div>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontSize:9,
-              letterSpacing:".15em", color:"var(--muted)", marginTop:2 }}>RATING</div>
-          </div>
-        </div>
-        <div style={{ display:"flex", justifyContent:"space-around", paddingTop:12,
-          borderTop:"1px solid var(--border)" }}>
-          {ROLES.map(r => {
+      {/* ── TOPO: banner de 5 campeões com splash arts ── */}
+      <div style={{ position:"relative", flexShrink:0, height:160 }}>
+        {/* Splashes lado a lado */}
+        <div style={{ display:"flex", height:"100%", overflow:"hidden" }}>
+          {ROLES.map((r, ri) => {
             const c = comp[r.key];
-            return c ? (
-              <div key={r.key} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:3 }}>
-                <div style={{ position:"relative" }}>
-                  <ChampImg version={version} id={c.id} name={c.name} size={32} radius={2}
-                    border={`1px solid ${r.color}66`}/>
-                  <div style={{ position:"absolute", inset:-1, borderRadius:2,
-                    boxShadow:`0 0 8px ${r.color}55`, pointerEvents:"none" }}/>
+            return (
+              <div key={r.key} style={{
+                flex:1, position:"relative", overflow:"hidden",
+              }}>
+                {c ? (
+                  <img
+                    src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${c.id}_0.jpg`}
+                    alt={c.name}
+                    onError={e => { e.target.src = `https://ddragon.leagueoflegends.com/cdn/${version}/img/champion/${c.id}.png`; }}
+                    style={{ position:"absolute", inset:0, width:"100%", height:"100%",
+                      objectFit:"cover", objectPosition:"top center" }}
+                  />
+                ) : (
+                  <div style={{ position:"absolute", inset:0, background:`${r.color}0a` }}/>
+                )}
+                {/* Overlay escuro */}
+                <div style={{ position:"absolute", inset:0,
+                  background:`linear-gradient(to bottom, rgba(6,10,20,0.1) 0%, rgba(6,10,20,0.7) 100%)` }}/>
+                {/* Separador vertical colorido */}
+                {ri > 0 && <div style={{ position:"absolute", left:0, top:0, bottom:0,
+                  width:1, background:`${r.color}33` }}/>}
+                {/* Label role no rodapé */}
+                <div style={{ position:"absolute", bottom:6, left:0, right:0,
+                  display:"flex", flexDirection:"column", alignItems:"center", gap:2 }}>
+                  {ROLE_ICONS[r.key](r.color, 14)}
+                  <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
+                    fontSize:8, color:r.color, letterSpacing:".12em",
+                    textShadow:`0 0 6px ${r.color}` }}>{r.label}</span>
                 </div>
-                <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-                  fontSize:8, color:r.color, letterSpacing:".1em" }}>{r.label}</span>
               </div>
-            ) : null;
+            );
           })}
         </div>
+        {/* Rating overlay — centro do banner */}
+        <div style={{
+          position:"absolute", top:10, left:"50%", transform:"translateX(-50%)",
+          display:"flex", flexDirection:"column", alignItems:"center", gap:0,
+          background:"rgba(2,8,20,0.78)", backdropFilter:"blur(10px)",
+          border:`1px solid ${ratingColor}55`,
+          borderRadius:3, padding:"6px 16px",
+          zIndex:3,
+        }}>
+          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800,
+            fontSize:9, letterSpacing:".2em", color:"var(--muted)" }}>
+            WIN RATE EST.
+          </div>
+          <div style={{ display:"flex", alignItems:"baseline", gap:8 }}>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800,
+              fontSize:28, color:"var(--gold)", lineHeight:1,
+              textShadow:"0 0 16px rgba(240,180,41,0.5)" }}>
+              {analysis.winrate}%
+            </span>
+            <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:800,
+              fontSize:28, lineHeight:1, color:ratingColor,
+              textShadow:`0 0 16px ${ratingColor}88` }}>
+              {analysis.rating}
+            </span>
+          </div>
+          <span style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600,
+            fontSize:9, letterSpacing:".15em", color:"var(--cyan)" }}>
+            {analysis.playstyle.toUpperCase()}
+          </span>
+        </div>
+        {/* Botão voltar — canto esq */}
+        <button onClick={onBack} style={{
+          position:"absolute", top:10, left:10, zIndex:4,
+          background:"rgba(2,8,20,0.72)", backdropFilter:"blur(6px)",
+          border:"1px solid rgba(11,196,227,0.2)", borderRadius:2,
+          padding:"5px 10px", color:"var(--cyan)", fontSize:9,
+          fontFamily:"'Barlow Condensed',sans-serif", letterSpacing:".12em",
+          fontWeight:700, cursor:"pointer", display:"flex", alignItems:"center", gap:4,
+        }}>← DRAFT</button>
       </div>
 
-      {/* Stats DDragon */}
-      {analysis.champStats && (
-        <div className="panel" style={{ padding:"12px 14px", marginBottom:14 }}>
-          <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-            fontSize:9, letterSpacing:".18em", color:"var(--muted)", marginBottom:10 }}>
-            ◆ STATS BASE — NÍVEL 1 · DATA DRAGON
+      {/* ── CORPO: stats + tabs ── */}
+      <div style={{ flex:1, overflow:"hidden", display:"flex", flexDirection:"column" }}>
+
+        {/* Stats rápidos — 5 barras em destaque */}
+        <div style={{
+          padding:"14px 16px 10px",
+          borderBottom:"1px solid var(--border)",
+          background:"linear-gradient(180deg,rgba(11,196,227,0.03) 0%,transparent 100%)",
+          flexShrink:0,
+        }}>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"8px 20px" }}>
+            {stats.map(s => (
+              <BigStatBar key={s.label} label={s.label} value={s.value} color={s.color}/>
+            ))}
           </div>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"6px 14px" }}>
-            {ROLES.map(r => {
-              const c = comp[r.key];
-              const s = analysis.champStats?.[r.key];
-              if (!c||!s) return null;
-              return (
-                <div key={r.key} style={{ display:"flex", alignItems:"center", gap:8 }}>
-                  <ChampImg version={version} id={c.id} name={c.name} size={24} radius={2}
-                    border={`1px solid ${r.color}44`}/>
-                  <div>
-                    <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-                      fontSize:9, color:r.color, letterSpacing:".05em" }}>{c.name}</div>
-                    <div style={{ fontSize:9, color:"var(--muted)", fontFamily:"monospace" }}>
-                      ❤{Math.round(s.hp)} ⚔{Math.round(s.attackdamage)} 🛡{Math.round(s.armor)}
-                    </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="tab-bar" style={{ flexShrink:0 }}>
+          {[
+            {k:"synergy",  l:"SINERGIAS"},
+            {k:"strategy", l:"ESTRATÉGIA"},
+            {k:"weak",     l:"FRAQUEZAS"},
+            {k:"data",     l:"DATA"},
+          ].map(t=>(
+            <button key={t.k} onClick={()=>setTab(t.k)}
+              className={`tab-btn ${tab===t.k?"active":""}`}>{t.l}</button>
+          ))}
+        </div>
+
+        {/* Tab content */}
+        <div style={{ flex:1, overflowY:"auto", padding:"12px 16px" }}>
+          {tab==="synergy" && (
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              {analysis.synergies?.length ? analysis.synergies.map((s,i)=>(
+                <div key={i} className="panel" style={{ padding:12 }}>
+                  <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
+                    fontSize:11, color:"var(--gold)", letterSpacing:".08em", marginBottom:5 }}>
+                    ◆ {s.pair}
+                  </div>
+                  <p style={{ fontSize:12, color:"var(--text)", lineHeight:1.6 }}>{s.desc}</p>
+                </div>
+              )) : (
+                <div style={{ padding:20, textAlign:"center", color:"var(--muted)", fontSize:12 }}>
+                  Nenhuma sinergia marcante detectada.
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab==="strategy" && (
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              <div className="panel" style={{ padding:14 }}>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
+                  fontSize:9, letterSpacing:".18em", color:"var(--cyan)", marginBottom:8 }}>
+                  ◆ ESTRATÉGIA GERAL
+                </div>
+                <p style={{ fontSize:13, color:"var(--text)", lineHeight:1.65 }}>{analysis.strategy}</p>
+              </div>
+              <div className="panel" style={{ padding:14, borderColor:"rgba(48,185,69,0.3)" }}>
+                <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
+                  fontSize:9, letterSpacing:".18em", color:"var(--green)", marginBottom:8 }}>
+                  ◆ WIN CONDITION
+                </div>
+                <p style={{ fontSize:13, color:"var(--text)", lineHeight:1.65 }}>{analysis.win_condition}</p>
+              </div>
+            </div>
+          )}
+
+          {tab==="weak" && (
+            <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+              {analysis.weaknesses?.length ? analysis.weaknesses.map((w,i)=>(
+                <div key={i} className="panel" style={{ padding:"10px 12px",
+                  borderColor:"rgba(232,68,43,0.25)",
+                  display:"flex", alignItems:"flex-start", gap:10 }}>
+                  <span style={{ color:"var(--red)", fontSize:12, flexShrink:0, marginTop:1 }}>◆</span>
+                  <span style={{ fontSize:12, color:"var(--text)", lineHeight:1.55 }}>{w}</span>
+                </div>
+              )) : (
+                <div style={{ padding:20, textAlign:"center", color:"var(--green)", fontSize:12 }}>
+                  ✓ Composição bem equilibrada — sem fraquezas críticas.
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab==="data" && (
+            <div>
+              {/* Stats base DDragon */}
+              {analysis.champStats && (
+                <div style={{ marginBottom:14 }}>
+                  <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
+                    fontSize:9, letterSpacing:".15em", color:"var(--muted)", marginBottom:8 }}>
+                    ◆ STATS BASE NÍVEL 1 · DATA DRAGON
+                  </div>
+                  <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                    {ROLES.map(r => {
+                      const c = comp[r.key]; const s = analysis.champStats?.[r.key];
+                      if (!c||!s) return null;
+                      return (
+                        <div key={r.key} style={{ display:"flex", alignItems:"center",
+                          gap:10, padding:"8px 10px", background:"rgba(255,255,255,0.02)",
+                          border:`1px solid ${r.color}22`, borderRadius:2 }}>
+                          <ChampImg version={version} id={c.id} name={c.name} size={32} radius={2}
+                            border={`1px solid ${r.color}55`}/>
+                          <div style={{ flex:1 }}>
+                            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
+                              fontSize:11, color:"#fff" }}>{c.name}</div>
+                            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600,
+                              fontSize:9, color:r.color, letterSpacing:".08em" }}>{r.label}</div>
+                          </div>
+                          <div style={{ display:"flex", gap:12 }}>
+                            {[["❤",Math.round(s.hp),"#e8442b"],["⚔",Math.round(s.attackdamage),"#f0b429"],
+                              ["🛡",Math.round(s.armor),"#38bdf8"],["⚡",Math.round(s.spellblock),"#a78bfa"]]
+                              .map(([icon,val,col])=>(
+                              <div key={icon} style={{ textAlign:"center" }}>
+                                <div style={{ fontSize:9 }}>{icon}</div>
+                                <div style={{ fontFamily:"monospace", fontSize:10,
+                                  color:col, fontWeight:700 }}>{val}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Tabs */}
-      <div className="tab-bar" style={{ marginBottom:14 }}>
-        {[{k:"stats",l:"ATRIBUTOS"},{k:"synergy",l:"SINERGIAS"},
-          {k:"strategy",l:"ESTRATÉGIA"},{k:"weak",l:"FRAQUEZAS"}].map(t=>(
-          <button key={t.k} onClick={()=>setTab(t.k)}
-            className={`tab-btn ${tab===t.k?"active":""}`}>{t.l}</button>
-        ))}
-      </div>
-
-      {tab==="stats" && (
-        <div>
-          <StatBar label="EARLY GAME" value={analysis.earlyGame} color="#f0b429"/>
-          <StatBar label="TEAMFIGHT"  value={analysis.teamFight} color="#e8442b"/>
-          <StatBar label="POKE"       value={analysis.poke}      color="#0bc4e3"/>
-          <StatBar label="ENGAGE"     value={analysis.engage}    color="#3cb043"/>
-          <StatBar label="SPLIT PUSH" value={analysis.split}     color="#a78bfa"/>
-          <div style={{ marginTop:14 }}>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-              fontSize:9, letterSpacing:".15em", color:"var(--muted)", marginBottom:8 }}>
-              ◆ CLASSES · DATA DRAGON OFICIAL
-            </div>
-            <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
-              {ROLES.map(r => comp[r.key]?.tags?.map(tag=>(
-                <span key={`${r.key}-${tag}`} style={{
-                  fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600,
-                  fontSize:9, padding:"2px 8px",
-                  background:`${r.color}14`, border:`1px solid ${r.color}44`,
-                  color:r.color, letterSpacing:".08em" }}>
-                  {comp[r.key].name.split(" ")[0].toUpperCase()} · {tag.toUpperCase()}
-                </span>
-              )))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {tab==="synergy" && (
-        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          {analysis.synergies?.length ? analysis.synergies.map((s,i)=>(
-            <div key={i} className="panel" style={{ padding:12 }}>
+              )}
+              {/* Classes */}
               <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-                fontSize:11, color:"var(--gold)", letterSpacing:".08em", marginBottom:5 }}>
-                ◆ {s.pair}
+                fontSize:9, letterSpacing:".15em", color:"var(--muted)", marginBottom:8 }}>
+                ◆ CLASSES · DATA DRAGON OFICIAL
               </div>
-              <p style={{ fontSize:12, color:"var(--text)", lineHeight:1.6 }}>{s.desc}</p>
-            </div>
-          )) : (
-            <div style={{ padding:20, textAlign:"center", color:"var(--muted)", fontSize:12 }}>
-              Nenhuma sinergia marcante detectada.
-            </div>
-          )}
-        </div>
-      )}
-
-      {tab==="strategy" && (
-        <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-          <div className="panel" style={{ padding:14 }}>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-              fontSize:9, letterSpacing:".18em", color:"var(--cyan)", marginBottom:8 }}>
-              ◆ ESTRATÉGIA GERAL
-            </div>
-            <p style={{ fontSize:13, color:"var(--text)", lineHeight:1.65 }}>{analysis.strategy}</p>
-          </div>
-          <div className="panel" style={{ padding:14, borderColor:"rgba(48,185,69,0.3)" }}>
-            <div style={{ fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-              fontSize:9, letterSpacing:".18em", color:"var(--green)", marginBottom:8 }}>
-              ◆ WIN CONDITION
-            </div>
-            <p style={{ fontSize:13, color:"var(--text)", lineHeight:1.65 }}>{analysis.win_condition}</p>
-          </div>
-        </div>
-      )}
-
-      {tab==="weak" && (
-        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-          {analysis.weaknesses?.length ? analysis.weaknesses.map((w,i)=>(
-            <div key={i} className="panel" style={{ padding:"10px 12px",
-              borderColor:"rgba(232,68,43,0.25)",
-              display:"flex", alignItems:"flex-start", gap:10 }}>
-              <span style={{ color:"var(--red)", fontSize:12, flexShrink:0, marginTop:1 }}>◆</span>
-              <span style={{ fontSize:12, color:"var(--text)", lineHeight:1.55 }}>{w}</span>
-            </div>
-          )) : (
-            <div style={{ padding:20, textAlign:"center", color:"var(--green)", fontSize:12 }}>
-              ✓ Composição bem equilibrada — sem fraquezas críticas.
+              <div style={{ display:"flex", flexWrap:"wrap", gap:5 }}>
+                {ROLES.map(r => comp[r.key]?.tags?.map(tag=>(
+                  <span key={`${r.key}-${tag}`} style={{
+                    fontFamily:"'Barlow Condensed',sans-serif", fontWeight:600,
+                    fontSize:9, padding:"3px 8px",
+                    background:`${r.color}14`, border:`1px solid ${r.color}44`,
+                    color:r.color, letterSpacing:".08em" }}>
+                    {comp[r.key].name.split(" ")[0].toUpperCase()} · {tag.toUpperCase()}
+                  </span>
+                )))}
+              </div>
             </div>
           )}
         </div>
-      )}
 
-      <div style={{ display:"flex", gap:8, marginTop:20 }}>
-        {onSave && (
-          <button onClick={onSave} style={{
-            flex:2, padding:"10px",
-            background:"linear-gradient(135deg,rgba(240,180,41,0.15),rgba(240,180,41,0.08))",
-            border:"1px solid rgba(240,180,41,0.4)", borderRadius:2, cursor:"pointer",
-            fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
-            fontSize:11, letterSpacing:".15em", color:"var(--gold)", transition:"all .2s" }}
-            onMouseEnter={e=>e.currentTarget.style.background="rgba(240,180,41,0.2)"}
-            onMouseLeave={e=>e.currentTarget.style.background="linear-gradient(135deg,rgba(240,180,41,0.15),rgba(240,180,41,0.08))"}>
-            ◇ SALVAR COMPOSIÇÃO
+        {/* Ações */}
+        <div style={{ padding:"10px 14px", borderTop:"1px solid var(--border)",
+          display:"flex", gap:8, flexShrink:0 }}>
+          {onSave && (
+            <button onClick={onSave} style={{
+              flex:2, padding:"9px",
+              background:"rgba(240,180,41,0.12)",
+              border:"1px solid rgba(240,180,41,0.35)", borderRadius:2, cursor:"pointer",
+              fontFamily:"'Barlow Condensed',sans-serif", fontWeight:700,
+              fontSize:11, letterSpacing:".12em", color:"var(--gold)", transition:"all .2s" }}
+              onMouseEnter={e=>e.currentTarget.style.background="rgba(240,180,41,0.2)"}
+              onMouseLeave={e=>e.currentTarget.style.background="rgba(240,180,41,0.12)"}>
+              ◇ SALVAR
+            </button>
+          )}
+          <button onClick={onReset} className="btn-ghost"
+            style={{ flex:1, padding:"9px", color:"var(--red)",
+              borderColor:"rgba(232,68,43,0.3)", fontSize:10 }}>
+            ↺ NOVA
           </button>
-        )}
-        <button onClick={onReset} className="btn-ghost"
-          style={{ flex:1, padding:"10px", color:"var(--red)",
-            borderColor:"rgba(232,68,43,0.3)", fontSize:10 }}>
-          ↺ NOVA
-        </button>
+        </div>
       </div>
     </div>
   );
@@ -1002,8 +936,9 @@ function Sidebar({ comp, version, analysis, view, champions,
 
   if (view === "analysis" && analysis) {
     return (
-      <aside style={{ borderLeft:"1px solid var(--border)", overflowY:"auto",
-        background:"linear-gradient(180deg, rgba(11,196,227,0.03) 0%, transparent 100%)" }}>
+      <aside style={{ borderLeft:"1px solid var(--border)",
+        display:"flex", flexDirection:"column", overflow:"hidden",
+        background:"var(--bg0)" }}>
         <AnalysisPanel analysis={analysis} comp={comp} version={version}
           onBack={onBack} onReset={handleReset} onSave={onSave}/>
       </aside>
@@ -1283,8 +1218,8 @@ export default function App() {
           {isDesktop ? (
             /* ── DESKTOP: grid 2 colunas ── */
             <div className="app-layout" style={{ minHeight:"calc(100vh - 56px)" }}>
-              {/* Left: map */}
-              <div style={{ display:"flex", flexDirection:"column", position:"relative" }}>
+              {/* Left: draft */}
+              <div style={{ display:"flex", flexDirection:"column", position:"relative", overflow:"hidden" }}>
                 {view === "analysis" ? (
                   /* Analysis header on desktop left panel */
                   <div style={{ flex:1, display:"flex", flexDirection:"column",
